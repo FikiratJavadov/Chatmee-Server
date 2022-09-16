@@ -1,0 +1,9 @@
+class GlobalError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.Operational = true;
+  }
+}
+
+module.exports = GlobalError;

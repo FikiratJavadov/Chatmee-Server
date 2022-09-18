@@ -34,6 +34,9 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+//!users obj
+const users = {};
+
 //!MongoDB connection
 const PORT = process.env.PORT || 5000;
 const DB = process.env.DB_URL.replace("<password>", process.env.DB_PASSWORD);
@@ -59,6 +62,26 @@ mongoose.connect(DB, (err) => {
       socket.join(user._id);
       console.log(`Server connected with a name: ${user.name}`);
       socket.emit("access-ok", user.name);
+
+      users[socket.id] = {
+        id: user._id,
+        typing: false,
+      };
+      console.log(users);
+
+      io.emit("online-status", users);
+    });
+
+    socket.on("typing", (user) => {
+      users[socket.id].typing = true;
+      io.emit("online-status", users);
+      socket.on("stop-typing", () => {
+        users[socket.id].typing = false;
+        io.emit("online-status", users);
+        console.log("stop typing");
+      });
+
+      console.log(users);
     });
 
     socket.on("send-message", (message) => {
@@ -69,8 +92,18 @@ mongoose.connect(DB, (err) => {
 
       for (let user of users) {
         if (user._id === sender._id) continue;
+        console.log("nu da");
         socket.to(user._id).emit("got-message", message);
       }
+    });
+
+    //* Diconnect user
+    socket.on("disconnect", function () {
+      console.log("Got disconnect!");
+
+      delete users[socket.id];
+
+      io.emit("online-status", users);
     });
   });
 });

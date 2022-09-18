@@ -11,6 +11,9 @@ const userRouter = require("./routes/userRouter");
 const chatRouter = require("./routes/chatRouter");
 const messageRouter = require("./routes/messageRouter");
 
+//* SOCKET IO
+const socket = require("socket.io");
+
 const app = express();
 
 if (process.env.NODE_ENV === "development") {
@@ -39,7 +42,37 @@ mongoose.connect(DB, (err) => {
 
   console.log("MongoDb connected");
 
-  app.listen(PORT, () => console.log(`Server running in PORT: ${PORT}`));
+  const server = app.listen(PORT, () =>
+    console.log(`Server running in PORT: ${PORT}`)
+  );
+  const io = socket(server, {
+    cors: {
+      origin: "http://localhost:3000",
+    },
+  });
+
+  io.on("connection", (socket) => {
+    console.log("a user connected");
+
+    socket.on("user-access", (user) => {
+      if (!user) return;
+      socket.join(user._id);
+      console.log(`Server connected with a name: ${user.name}`);
+      socket.emit("access-ok", user.name);
+    });
+
+    socket.on("send-message", (message) => {
+      console.log("Sending message");
+      if (!message.chat || !message.sender) return;
+      const users = message.chat.users;
+      const sender = message.sender;
+
+      for (let user of users) {
+        if (user._id === sender._id) continue;
+        socket.to(user._id).emit("got-message", message);
+      }
+    });
+  });
 });
 
 //! Running the server

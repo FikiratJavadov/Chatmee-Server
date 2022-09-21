@@ -5,6 +5,8 @@ require("dotenv").config({ path: "./config.env" });
 const errorHandler = require("./error/errorHandler");
 const GlobalError = require("./error/GlobalError");
 
+const User = require("./model/user");
+
 const cors = require("cors");
 //*Routers
 const userRouter = require("./routes/userRouter");
@@ -16,11 +18,12 @@ const socket = require("socket.io");
 
 const app = express();
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+// if (process.env.NODE_ENV === "development") {
+//   app.use(morgan("dev"));
+// }
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb", extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 //!Routes
 app.use("/api/v1/user", userRouter);
@@ -67,26 +70,43 @@ mongoose.connect(DB, (err) => {
         id: user._id,
         typing: false,
       };
-      console.log(users);
+      // console.log(users);
 
       io.emit("online-status", users);
     });
 
-    socket.on("typing", (user) => {
-      users[socket.id].typing = true;
-      io.emit("online-status", users);
-      socket.on("stop-typing", () => {
-        users[socket.id].typing = false;
-        io.emit("online-status", users);
-        console.log("stop typing");
-      });
-
-      console.log(users);
+    socket.on("join-room", (roomId) => {
+      console.log(`User join room: ${roomId}`);
+      socket.join(roomId);
     });
+
+    socket.on("typing", (roomId) => {
+      console.log("typing", roomId);
+      socket.to(roomId).emit("typing", roomId);
+    });
+
+    socket.on("stop-typing", (roomId) => {
+      console.log("by", roomId);
+      socket.to(roomId).emit("stop-typing", roomId);
+    });
+
+    // socket.on("typing", (user) => {
+    //   users[socket.id].typing = true;
+    //   io.emit("online-status", users);
+    //   socket.on("stop-typing", () => {
+    //     users[socket.id].typing = false;
+    //     io.emit("online-status", users);
+    //     console.log("stop typing");
+    //   });
+
+    //   console.log(users);
+    // });
 
     socket.on("send-message", (message) => {
       console.log("Sending message");
       if (!message.chat || !message.sender) return;
+      console.log(message);
+
       const users = message.chat.users;
       const sender = message.sender;
 
@@ -98,9 +118,8 @@ mongoose.connect(DB, (err) => {
     });
 
     //* Diconnect user
-    socket.on("disconnect", function () {
+    socket.on("disconnect", async function (userId) {
       console.log("Got disconnect!");
-
       delete users[socket.id];
 
       io.emit("online-status", users);

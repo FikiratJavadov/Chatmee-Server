@@ -1,5 +1,6 @@
 const { asyncCatch } = require("../utils/asyncCatch");
 const User = require("../model/user");
+const Chat = require("../model/chat");
 const Message = require("../model/message");
 const GlobalError = require("../error/GlobalError");
 
@@ -33,8 +34,10 @@ exports.sendMessage = asyncCatch(async (req, res, next) => {
 
   let message = await Message.create(newMessage);
   message = await message.populate("sender");
+  await Chat.findByIdAndUpdate(chat, { lastMessage: message._id });
   message = await message.populate("chat");
   message = await User.populate(message, { path: "chat.users" });
+  message = await message.populate("chat.lastMessage");
 
   res.json({ success: true, data: { message } });
 });

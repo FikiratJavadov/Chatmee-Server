@@ -5,7 +5,10 @@ const GlobalError = require("../error/GlobalError");
 
 //* Get all Chats
 exports.getAllChats = asyncCatch(async (req, res, next) => {
-  const chats = await Chat.find({ users: req.user._id }).populate("users");
+  const chats = await Chat.find({ users: req.user._id })
+    .populate("users")
+    .populate("lastMessage")
+    .sort({ updatedAt: -1 });
 
   res.json({ success: true, data: { chats } });
 });
@@ -38,4 +41,3 @@ exports.createChat = asyncCatch(async (req, res, next) => {
 
   res.json({ success: true, data: { chat: createdChat } });
 });
-

@@ -41,3 +41,17 @@ exports.createChat = asyncCatch(async (req, res, next) => {
 
   res.json({ success: true, data: { chat: createdChat } });
 });
+
+exports.updateChat = asyncCatch(async (req, res, next) => {
+  const id = req.params.id;
+
+  const chats = await Chat.findOneAndUpdate(
+    { _id: id },
+    { $inc: { unreadMessages: 1 } },
+    { new: true }
+  )
+    .populate("users")
+    .populate("lastMessage");
+
+  res.json({ success: true, data: { chats } });
+});

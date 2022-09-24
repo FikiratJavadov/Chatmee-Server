@@ -5,5 +5,6 @@ const { privateRoute } = require("../middleware/privateRoute");
 
 router.get("/", privateRoute, chatController.getAllChats);
 router.post("/", privateRoute, chatController.createChat);
+router.patch("/:id", privateRoute, chatController.updateChat);
 
 module.exports = router;

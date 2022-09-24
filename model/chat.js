@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+//Todo Implement model which will strore the total nomber of unread messages per chat.
+
 const chatSchema = mongoose.Schema(
   {
     chatName: {
@@ -19,6 +21,10 @@ const chatSchema = mongoose.Schema(
       ],
     },
 
+    unreadMessages: {
+      type: Number,
+      default: 0,
+    },
     isGroupChat: {
       type: Boolean,
     },

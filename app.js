@@ -70,7 +70,6 @@ mongoose.connect(DB, (err) => {
         id: user._id,
         typing: false,
       };
-      // console.log(users);
 
       io.emit("online-status", users);
     });
@@ -86,21 +85,9 @@ mongoose.connect(DB, (err) => {
     });
 
     socket.on("stop-typing", (roomId) => {
-      console.log("by", roomId);
+      console.log("bye", roomId);
       socket.to(roomId).emit("stop-typing", roomId);
     });
-
-    // socket.on("typing", (user) => {
-    //   users[socket.id].typing = true;
-    //   io.emit("online-status", users);
-    //   socket.on("stop-typing", () => {
-    //     users[socket.id].typing = false;
-    //     io.emit("online-status", users);
-    //     console.log("stop typing");
-    //   });
-
-    //   console.log(users);
-    // });
 
     socket.on("send-message", (message) => {
       console.log("Sending message");
@@ -118,8 +105,8 @@ mongoose.connect(DB, (err) => {
     });
 
     //* Diconnect user
-    socket.on("disconnect", async function (userId) {
-      console.log("Got disconnect!");
+    socket.on("disconnect", async function () {
+      console.log(`Got disconnect by room!`);
       delete users[socket.id];
 
       io.emit("online-status", users);

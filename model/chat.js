@@ -21,10 +21,6 @@ const chatSchema = mongoose.Schema(
       ],
     },
 
-    unreadMessages: {
-      type: Number,
-      default: 0,
-    },
     isGroupChat: {
       type: Boolean,
     },

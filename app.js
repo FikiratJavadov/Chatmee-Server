@@ -1,11 +1,13 @@
 const express = require("express");
-const morgan = require("morgan");
 const mongoose = require("mongoose");
 require("dotenv").config({ path: "./config.env" });
 const errorHandler = require("./error/errorHandler");
 const GlobalError = require("./error/GlobalError");
 
+//* Models
 const User = require("./model/user");
+const Message = require("./model/message");
+const Chat = require("./model/chat");
 
 const cors = require("cors");
 //*Routers
@@ -16,11 +18,10 @@ const messageRouter = require("./routes/messageRouter");
 //* SOCKET IO
 const socket = require("socket.io");
 
+//* App.js
 const app = express();
 
-// if (process.env.NODE_ENV === "development") {
-//   app.use(morgan("dev"));
-// }
+//* Global Middlewares
 app.use(cors());
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -45,7 +46,6 @@ const PORT = process.env.PORT || 5000;
 const DB = process.env.DB_URL.replace("<password>", process.env.DB_PASSWORD);
 mongoose.connect(DB, (err) => {
   if (err) return console.log(err);
-
   console.log("MongoDb connected");
 
   const server = app.listen(PORT, () =>

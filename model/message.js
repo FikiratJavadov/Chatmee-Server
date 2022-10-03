@@ -14,7 +14,6 @@ const messageSchema = mongoose.Schema(
     },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     chat: { type: mongoose.Schema.Types.ObjectId, ref: "chat" },
-    read: Boolean,
   },
   { timestamps: true }
 );

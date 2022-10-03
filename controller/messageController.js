@@ -41,3 +41,12 @@ exports.sendMessage = asyncCatch(async (req, res, next) => {
 
   res.json({ success: true, data: { message } });
 });
+
+exports.readMessage = asyncCatch(async (req, res, next) => {
+
+  
+
+
+
+  res.json({ success: true, data: { message } });
+});
